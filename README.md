@@ -13,6 +13,10 @@ This repository is a boilerplate for go project in STUDIO.
    ```
    
 # Tips
+## How to run tests
+```
+APP_ENV=test PROJECT_UUID=<Project UUID> PROJECT_ID=<Project ID here> GOOGLE_APPLICATION_CREDENTIALS=<Service Account file path here> go test -v -race -run=. -bench=. ./...
+```
 ## How to format all go files
 ```
 go fmt ./...
