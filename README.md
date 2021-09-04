@@ -21,3 +21,7 @@ APP_ENV=test PROJECT_UUID=<Project UUID> PROJECT_ID=<Project ID here> GOOGLE_APP
 ```
 go fmt ./...
 ```
+## Clean up go.mod
+```
+go mod tidy
+```
