@@ -1,0 +1,1 @@
+DROP TRIGGER todos.before_insert_todos;

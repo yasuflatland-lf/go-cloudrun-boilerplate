@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/secretmanager v0.1.0
 	github.com/docker/go-connections v0.4.0
 	github.com/glassonion1/logz v0.3.11
+	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/labstack/echo/v4 v4.5.0
