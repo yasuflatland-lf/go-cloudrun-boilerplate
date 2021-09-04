@@ -92,7 +92,6 @@ func (c *cloudSQL) Open(ctx context.Context, dsn string) (*gorm.DB, error) {
 	})
 
 	if err != nil || db == nil {
-		logz.Errorf(ctx, "error connect to db %+v", xerrors.Errorf(": %w", err))
 		return nil, xerrors.Errorf(": %w", err)
 	}
 
@@ -102,7 +101,6 @@ func (c *cloudSQL) Open(ctx context.Context, dsn string) (*gorm.DB, error) {
 	// GetDomains generic database object sql.DB to use its functions
 	sqlDB, err := db.DB()
 	if err != nil {
-		logz.Errorf(ctx, "error to fetch sqlDB %+v", xerrors.Errorf(": %w", err))
 		return nil, xerrors.Errorf(": %w", err)
 	}
 

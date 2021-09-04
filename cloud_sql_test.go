@@ -13,7 +13,7 @@ func TestCloudSQL(t *testing.T) {
 
 	t.Run("GORM Connection Open Test", func(t *testing.T) {
 		t.Parallel()
-		
+
 		dao := NewCloudSQL(ctx)
 		db := dao.DB()
 		assert.NotNil(t, db)

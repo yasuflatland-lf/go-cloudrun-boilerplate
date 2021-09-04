@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/docker/go-connections/nat"
+	"github.com/fsouza/fake-gcs-server/fakestorage"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"os"
@@ -75,4 +76,26 @@ func initMySQLContainer() (string, func()) {
 	}
 
 	return dataSourceName, cTerm
+}
+
+// Test gcs Server wrapper
+func runServersTest(t *testing.T, objs []fakestorage.Object, fn func(*testing.T, *fakestorage.Server)) {
+
+	t.Run("tcp listener", func(t *testing.T) {
+		t.Parallel()
+		tcpServer, err := fakestorage.NewServerWithOptions(fakestorage.Options{NoListener: false, InitialObjects: objs})
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tcpServer.Stop()
+		fn(t, tcpServer)
+	})
+	t.Run("no listener", func(t *testing.T) {
+		t.Parallel()
+		noListenerServer, err := fakestorage.NewServerWithOptions(fakestorage.Options{NoListener: true, InitialObjects: objs})
+		if err != nil {
+			t.Fatal(err)
+		}
+		fn(t, noListenerServer)
+	})
 }
