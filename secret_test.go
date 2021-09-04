@@ -16,6 +16,7 @@ func TestSecret(t *testing.T) {
 	PROJECT_ID := os.Getenv("PROJECT_ID")
 
 	t.Run("Create, Delete and Get A Secret", func(t *testing.T) {
+		t.Parallel()
 		storeString := "test"
 
 		// Create instance
