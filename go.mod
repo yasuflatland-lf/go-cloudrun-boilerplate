@@ -5,6 +5,7 @@ go 1.17
 require (
 	cloud.google.com/go/secretmanager v0.1.0
 	cloud.google.com/go/storage v1.16.0
+	github.com/bxcodec/faker/v3 v3.6.0
 	github.com/docker/go-connections v0.4.0
 	github.com/fsouza/fake-gcs-server v1.30.1
 	github.com/glassonion1/logz v0.3.11

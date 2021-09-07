@@ -8,30 +8,27 @@ import (
 
 type (
 	TodoService interface {
+		List(status bool, page, pagesize int, order string) (todos []*Todo, totalRows int, err error)
 		Create(todo *Todo) (*Todo, error)
-		Delete(todo *Todo) (rowsAffected int64, err error)
-		Get(id int) (*Todo, error)
+		CreateInBatches(todos []Todo) ([]Todo, error)
+		Delete(ID int64) (rowsAffected int64, err error)
+		Get(id int64) (*Todo, error)
+		Update(todo *Todo) (*Todo, error)
 	}
 
 	todoService struct {
 		Repository CloudSQL
 	}
 
-	//https://qiita.com/sky0621/items/90a8b6e7dd097cd671cd
-	// https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
 	Todo struct {
-		//[ 0] id                                             bigint               null: false  primary: true   isArray: false  auto: true   col: bigint          len: -1      default: []
-		ID int64 `gorm:"primary_key;AUTO_INCREMENT;column:id;type:bigint;"`
-		//[ 1] slug                                           varchar              null: false  primary: false  isArray: false  auto: false  col: varchar         len: 0       default: []
-		Slug string `gorm:"column:slug;type:varchar;"`
-		//[ 2] task                                           text                 null: false  primary: false  isArray: false  auto: false  col: text            len: 0       default: []
-		Task string `gorm:"column:task;type:text;"`
-		//[ 3] status                                         tinyint              null: true   primary: false  isArray: false  auto: false  col: tinyint         len: -1      default: [0]
-		Status bool `gorm:"column:status;type:tinyint;default:0;"`
-		//[ 4] created_at                                     timestamp            null: false  primary: false  isArray: false  auto: false  col: timestamp       len: -1      default: [CURRENT_TIMESTAMP]
-		CreatedAt time.Time `gorm:"column:created_at;type:timestamp;default:CURRENT_TIMESTAMP;"`
-		//[ 5] updated_at                                     timestamp            null: false  primary: false  isArray: false  auto: false  col: timestamp       len: -1      default: [CURRENT_TIMESTAMP]
-		UpdatedAt time.Time `gorm:"column:updated_at;type:timestamp;default:CURRENT_TIMESTAMP;"`
+		// field named `ID` will be used as a primary field by default
+		// https://gorm.io/docs/conventions.html#ID-as-Primary-Key
+		ID        int64     `gorm:"primary_key;AUTO_INCREMENT;column:id;type:bigint;" faker:"-"`
+		Slug      string    `gorm:"column:slug;type:varchar;" faker:"uuid_hyphenated"`
+		Task      string    `gorm:"column:task;type:text;"`
+		Status    bool      `gorm:"column:status;type:tinyint;default:0;"`
+		CreatedAt time.Time `gorm:"column:created_at;type:timestamp;default:CURRENT_TIMESTAMP;" faker:"-"`
+		UpdatedAt time.Time `gorm:"column:updated_at;type:timestamp;default:CURRENT_TIMESTAMP;" faker:"-"`
 	}
 )
 
@@ -41,29 +38,41 @@ func NewTodoService(ctx context.Context) TodoService {
 	return t
 }
 
-func (t *todoService) List(status bool, order string, offset int64, limit int64) ([]Todo, error) {
-	todos := &[]Todo{}
-	tx := t.Repository.DB().
-		Where(map[string]interface{}{"status": status}).
-		Order("updated_at " + order).
-		Offset(int(offset)).
-		Limit(int(limit)).
-		Find(&todos)
+func (t *todoService) List(status bool, page, pagesize int, order string) (todos []*Todo, totalRows int, err error) {
+	resultOrm := t.Repository.DB().Model(&Todo{})
 
-	if tx.Error != nil {
-		return []Todo{}, xerrors.Errorf("Create : %w", tx.Error)
+	if page > 0 {
+		offset := (page - 1) * pagesize
+		resultOrm = resultOrm.Offset(offset).Limit(pagesize)
+	} else {
+		resultOrm = resultOrm.Limit(pagesize)
 	}
 
-	return *todos, nil
+	if order != "" {
+		resultOrm = resultOrm.Order(order)
+	}
+
+	resultOrm = resultOrm.Where("status = ?", status)
+
+	if err = resultOrm.Find(&todos).Error; err != nil {
+		return nil, -1, xerrors.Errorf("List : can not find the record : %w", err)
+	}
+
+	return todos, len(todos), nil
 }
 
 // Delete
 // https://gorm.io/docs/delete.html
-func (t *todoService) Delete(todo *Todo) (rowsAffected int64, err error) {
-	tx := t.Repository.DB().Delete(todo)
-
+func (t *todoService) Delete(ID int64) (rowsAffected int64, err error) {
+	todo := &Todo{}
+	tx := t.Repository.DB().First(todo, ID)
 	if tx.Error != nil {
-		return -1, xerrors.Errorf("Create : %w", tx.Error)
+		return -1, xerrors.Errorf("Delete : can not find the record : %w", tx.Error)
+	}
+
+	tx = t.Repository.DB().Delete(todo)
+	if tx.Error != nil {
+		return -1, xerrors.Errorf("Can not Delete : %w", tx.Error)
 	}
 
 	return tx.RowsAffected, nil
@@ -81,10 +90,23 @@ func (t *todoService) Create(todo *Todo) (*Todo, error) {
 	return todo, nil
 }
 
+// Create in Batches
+// https://gorm.io/docs/create.html
+func (t *todoService) CreateInBatches(todos []Todo) ([]Todo, error) {
+	tx := t.Repository.DB().CreateInBatches(todos,len(todos))
+
+	if tx.Error != nil {
+		return nil, xerrors.Errorf("Create : %w", tx.Error)
+	}
+
+	return todos, nil
+}
+
+
 // Query
 // https://gorm.io/docs/query.html
 // https://gorm.io/docs/advanced_query.html
-func (t *todoService) Get(id int) (*Todo, error) {
+func (t *todoService) Get(id int64) (*Todo, error) {
 	todo := &Todo{}
 	if err := t.Repository.DB().First(todo, id).Error; err != nil {
 		return nil, xerrors.Errorf("Get : %w", err)
