@@ -11,9 +11,9 @@ import (
 type (
 	GCS interface {
 		Object(bucketName string, objectName string) *storage.ObjectHandle
-		Write(bucketName string, objectName string, writeStr []byte, contentType string) (*storage.Writer, error)
-		Read(bucketName string, objectName string) ([]byte, error)
-		IsExist(bucketName string, objectName string) bool
+		Write(ctx context.Context, bucketName string, objectName string, writeStr []byte, contentType string) (*storage.Writer, error)
+		Read(ctx context.Context, bucketName string, objectName string) ([]byte, error)
+		IsExist(ctx context.Context, bucketName string, objectName string) bool
 	}
 
 	gcs struct {
@@ -27,7 +27,7 @@ const (
 	ContentTypeText = "text/plain; charset=utf-8"
 )
 
-func NewGCS(ctx context.Context, client *storage.Client) *gcs {
+func NewGCS(ctx context.Context, client *storage.Client) GCS {
 	g := &gcs{}
 
 	if client == nil {

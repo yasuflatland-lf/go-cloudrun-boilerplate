@@ -33,6 +33,8 @@ type (
 	}
 )
 
+// SQL Connection
+// https://github.com/terraform-google-modules/terraform-google-sql-db/tree/master/modules/safer_mysql
 func NewCloudSQL(ctx context.Context) CloudSQL {
 	c := &cloudSQL{}
 
@@ -74,7 +76,7 @@ func (c *cloudSQL) GetDSN() string {
 }
 
 func (c *cloudSQL) GenerateDSNLocal(name string, username string, password string, ip string, port int64) string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", username, password, ip, port, name)
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, ip, port, name)
 }
 
 func (c *cloudSQL) GenerateDSNForCloudDB(name string, username string, password string, cloudSqlInstances string) string {

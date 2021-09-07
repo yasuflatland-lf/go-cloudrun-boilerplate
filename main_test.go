@@ -20,7 +20,7 @@ func TestMain(m *testing.M) {
 	defer mysqlTerm()
 
 	// Run tests
-	os.Exit(m.Run())
+	m.Run()
 }
 
 // Generate dsn and close function for test use.
@@ -98,4 +98,18 @@ func runServersTest(t *testing.T, objs []fakestorage.Object, fn func(*testing.T,
 		}
 		fn(t, noListenerServer)
 	})
+}
+
+type testFunc func(t *testing.T)
+
+func eachTestWrapper(fn func(t *testing.T)) func(t *testing.T) {
+	return func(t *testing.T) {
+		ctx := context.Background()
+		dao := NewCloudSQL(ctx)
+
+		_ = dao.StartMigrations(ctx)
+		fn(t)
+		_ = dao.RollbackLastMigrations(ctx)
+		return
+	}
 }

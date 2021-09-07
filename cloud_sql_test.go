@@ -8,6 +8,7 @@ import (
 
 // Test MySQL Smoke
 func TestCloudSQL(t *testing.T) {
+	t.Helper()
 	t.Parallel()
 	ctx := context.Background()
 
