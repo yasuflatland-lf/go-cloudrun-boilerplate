@@ -55,8 +55,8 @@ func NewCloudSQL(ctx context.Context) CloudSQL {
 			c.config.Name,
 			c.config.UserName,
 			c.config.Password,
-			c.config.IP,
-			c.config.Port,
+			c.config.DBIP,
+			c.config.DBPort,
 		)
 	}
 

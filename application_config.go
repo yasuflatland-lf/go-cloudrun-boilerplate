@@ -24,17 +24,21 @@ type (
 
 	applicationConfig struct {
 		// Environment
-		Environment   string `required:"true" envconfig:"APP_ENV" default:"test"`
-		ProjectUuid   string `required:"true" envconfig:"PROJECT_UUID" default:""`
-		ProjectId     string `required:"true" envconfig:"PROJECT_ID" default:""`
-		ImageName     string `required:"true" envconfig:"IMAGE_NAME" default:"go-cloudrun-boilerplate"`
-		IP            string `required:"false" envconfig:"DB_IP" default:"127.0.0.1"`
-		Port          int64  `required:"true" envconfig:"DB_PORT" default:"3306"`
-		MaxIdleConns  int    `required:"false" envconfig:"DB_MAX_IDLE_CONNS" default:"10"`
-		MaxOpenConns  int    `required:"false" envconfig:"DB_MAX_OPEN_CONNS" default:"100"`
-		LoadDataLimit int64  `required:"false" envconfig:"LOAD_DATA_LIMIT" default:"1000"`
-		BucketName    string `required:"false" envconfig:"BUCKET_NAME" default:"go-cloudrun-boilerplate-us-central1-data"`
-		ObjectName    string `required:"false" envconfig:"OBJECT_NAME" default:"test.json"`
+		Environment string `required:"true" envconfig:"APP_ENV" default:"test"`
+		ProjectUuid string `required:"true" envconfig:"PROJECT_UUID" default:""`
+		ProjectId   string `required:"true" envconfig:"PROJECT_ID" default:""`
+		ImageName   string `required:"true" envconfig:"IMAGE_NAME" default:"go-cloudrun-boilerplate"`
+		Port        int    `required:"false" envconfig:"PORT" default:1323`
+
+		// Database
+		DBIP         string `required:"false" envconfig:"DB_IP" default:"127.0.0.1"`
+		DBPort       int64  `required:"true" envconfig:"DB_PORT" default:"3306"`
+		MaxIdleConns int    `required:"false" envconfig:"DB_MAX_IDLE_CONNS" default:"10"`
+		MaxOpenConns int    `required:"false" envconfig:"DB_MAX_OPEN_CONNS" default:"100"`
+
+		// GCS
+		BucketName string `required:"false" envconfig:"BUCKET_NAME" default:"go-cloudrun-boilerplate-us-central1-data"`
+		ObjectName string `required:"false" envconfig:"OBJECT_NAME" default:"test.json"`
 
 		// Instance related
 		TimeOut int `required:"false" envconfig:"TIMEOUT" default:"1200"`
