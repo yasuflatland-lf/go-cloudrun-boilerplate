@@ -3,10 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/bxcodec/faker/v3"
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 )
 
@@ -39,16 +43,157 @@ func TestTodoController(t *testing.T) {
 
 	}))
 
-	t.Run("Get", func(t *testing.T) {
-		// Setup
-		e := NewRouter(ctx)
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("/:id")
-		c.SetParamNames("id")
-		c.SetParamValues("1")
+	t.Run("Create Get and Delete", eachTestWrapper(func(t *testing.T) {
+		t.Run("1 Create", func(t *testing.T) {
+			// Create a todo
+			todo := &Todo{}
+			// Generate Fake data
+			if err := faker.FakeData(&todo); err != nil {
+				assert.Nil(t, err)
+			}
+			// Stringify object
+			todoStr, err := json.Marshal(todo)
+			if err != nil {
+				assert.Nil(t, err)
+			}
 
-		assert.Equal(t, http.StatusOK, rec.Code)
-	})
+			// fmt.Printf("%+v", string(todoStr))
+			// Setup
+			router := NewRouter(ctx)
+
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(todoStr)))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+
+			router.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.NotEmpty(t, rec.Body.String())
+		})
+
+		t.Run("2 Get", func(t *testing.T) {
+			// Setup
+			router := NewRouter(ctx)
+
+			// ID 1 record Should be created in the above Create
+			req := httptest.NewRequest(http.MethodGet, "/1", nil)
+			rec := httptest.NewRecorder()
+
+			router.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.NotEmpty(t, rec.Body.String())
+		})
+
+		t.Run("3 Delete", func(t *testing.T) {
+			// Setup
+			router := NewRouter(ctx)
+
+			// ID 1 record Should be created in the above Create
+			req := httptest.NewRequest(http.MethodDelete, "/1", nil)
+			rec := httptest.NewRecorder()
+
+			router.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, "{ \"RowsAffected\": 1 }", rec.Body.String())
+		})
+
+		t.Run("4 Make sure the data is deleted", func(t *testing.T) {
+			// Setup
+			router := NewRouter(ctx)
+
+			// ID 1 record Should be created in the above Create
+			req := httptest.NewRequest(http.MethodGet, "/1", nil)
+			rec := httptest.NewRecorder()
+
+			router.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, "{}\n", rec.Body.String())
+		})
+	}))
+
+	t.Run("Update", eachTestWrapper(func(t *testing.T) {
+		t.Run("1 Create", func(t *testing.T) {
+			// Create a todo
+			todo := &Todo{}
+			// Generate Fake data
+			if err := faker.FakeData(&todo); err != nil {
+				assert.Nil(t, err)
+			}
+			// Stringify object
+			todoStr, err := json.Marshal(todo)
+			if err != nil {
+				assert.Nil(t, err)
+			}
+
+			// Setup
+			router := NewRouter(ctx)
+
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(todoStr)))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+
+			router.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.NotEmpty(t, rec.Body.String())
+			// fmt.Printf("%+v", rec.Body.String())
+		})
+
+		t.Run("2 Get and Update", func(t *testing.T) {
+			// Setup
+			router := NewRouter(ctx)
+			todo := &Todo{
+				ID:     1,
+				Slug:   "test-slug",
+				Task:   "Changed",
+				Status: true,
+			}
+
+			// Stringify object
+			todoStr, err := json.Marshal(todo)
+			if err != nil {
+				assert.Nil(t, err)
+			}
+
+			req := httptest.NewRequest(http.MethodPut, "/", strings.NewReader(string(todoStr)))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+
+			router.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.NotEmpty(t, rec.Body.String())
+			fmt.Printf("%+v", rec.Body.String())
+		})
+
+		t.Run("3 Update Fail", func(t *testing.T) {
+			// Setup
+			router := NewRouter(ctx)
+			todo := &Todo{
+				ID:     2,
+				Slug:   "test-slug",
+				Task:   "Changed",
+				Status: true,
+			}
+
+			// Stringify object
+			todoStr, err := json.Marshal(todo)
+			if err != nil {
+				assert.Nil(t, err)
+			}
+
+			req := httptest.NewRequest(http.MethodPut, "/", strings.NewReader(string(todoStr)))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+
+			router.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+			assert.NotEmpty(t, rec.Body.String())
+			//fmt.Printf("%+v", rec.Body.String())
+		})
+	}))
 }

@@ -28,7 +28,6 @@ func NewRouter(ctx context.Context) *echo.Echo {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
-	e.Use(middleware.CSRF())
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(100)))
 
 	todoController := NewTodoController(ctx)
@@ -36,6 +35,9 @@ func NewRouter(ctx context.Context) *echo.Echo {
 	// Routes
 	e.GET("/todos", todoController.List)
 	e.GET("/:id", todoController.Get)
+	e.POST("/", todoController.Create)
+	e.DELETE("/:id", todoController.Delete)
+	e.PUT("/", todoController.Update)
 
 	return e
 }

@@ -37,7 +37,7 @@ func (s *secret) GetSecret(secretId string) (string, error) {
 	// Get Client
 	client, err := secretmanager.NewClient(s.ctx)
 	if err != nil {
-		return "", xerrors.Errorf("failed to fetch secret manager : %w\n", err)
+		return "", xerrors.Errorf("failed to fetch secret manager : %+w\n", err)
 	}
 	defer client.Close()
 
@@ -50,7 +50,7 @@ func (s *secret) GetSecret(secretId string) (string, error) {
 
 	result, err := client.AccessSecretVersion(s.ctx, req)
 	if err != nil {
-		return "", xerrors.Errorf("failed to access secret version : %w : %w\n", secretId, err)
+		return "", xerrors.Errorf("failed to access secret version : %+w : %+w\n", secretId, err)
 	}
 
 	return string(result.Payload.Data), nil
@@ -60,7 +60,7 @@ func (s *secret) DeleteSecret(secretId string) error {
 	// Get Client
 	client, err := secretmanager.NewClient(s.ctx)
 	if err != nil {
-		return xerrors.Errorf("failed to fetch secret manager : %w\n", err)
+		return xerrors.Errorf("failed to fetch secret manager : %+w\n", err)
 	}
 	defer client.Close()
 
@@ -73,7 +73,7 @@ func (s *secret) DeleteSecret(secretId string) error {
 
 	err = client.DeleteSecret(s.ctx, req)
 	if err != nil {
-		return xerrors.Errorf("failed to delete secret : %w : %w\n", secretId, err)
+		return xerrors.Errorf("failed to delete secret : %+w : %+w\n", secretId, err)
 	}
 
 	return nil
@@ -86,7 +86,7 @@ func (s *secret) CreateSecret(secretId string, plainText string) (*secretmanager
 	// Get Client
 	client, err := secretmanager.NewClient(s.ctx)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to fetch secret manager : %w\n", err)
+		return nil, xerrors.Errorf("failed to fetch secret manager : %+w\n", err)
 	}
 	defer client.Close()
 
@@ -105,7 +105,7 @@ func (s *secret) CreateSecret(secretId string, plainText string) (*secretmanager
 
 	// When secret already exists
 	if err != nil {
-		return secret, xerrors.Errorf("Secret has already been created. : %w\n", err)
+		return secret, xerrors.Errorf("Secret has already been created. : %+w\n", err)
 	}
 
 	// Write data into the latest version.

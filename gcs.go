@@ -34,7 +34,7 @@ func NewGCS(ctx context.Context, client *storage.Client) GCS {
 		// Production should be passed client is null, then create the new client
 		newClient, err := storage.NewClient(ctx)
 		if err != nil {
-			logz.Criticalf(ctx, "%+v\n", xerrors.Errorf(": %w", err))
+			logz.Criticalf(ctx, "%+v\n", xerrors.Errorf(": %+w", err))
 		}
 		g.storageClient = newClient
 	} else {
@@ -55,11 +55,11 @@ func (g *gcs) Write(ctx context.Context, bucketName string, objectName string, w
 	writer.ContentType = contentType
 
 	if _, err := writer.Write(writeStr); err != nil {
-		return nil, xerrors.Errorf(": %w", err)
+		return nil, xerrors.Errorf(": %+w", err)
 	}
 
 	if err := writer.Close(); err != nil {
-		return nil, xerrors.Errorf(": %w", err)
+		return nil, xerrors.Errorf(": %+w", err)
 	}
 
 	return writer, nil
@@ -69,7 +69,7 @@ func (g *gcs) Read(ctx context.Context, bucketName string, objectName string) ([
 	reader, err := g.Object(bucketName, objectName).NewReader(ctx)
 
 	if err != nil {
-		return nil, xerrors.Errorf(": %w", err)
+		return nil, xerrors.Errorf(": %+w", err)
 	}
 	defer reader.Close()
 
@@ -84,12 +84,12 @@ func (g *gcs) Read(ctx context.Context, bucketName string, objectName string) ([
 func (g *gcs) IsExist(ctx context.Context, bucketName string, objectName string) bool {
 	reader, err := g.Object(bucketName, objectName).NewReader(ctx)
 	if err != nil {
-		logz.Infof(ctx, "No corresponding bucketName: %+v\n", xerrors.Errorf(": %w", err))
+		logz.Infof(ctx, "No corresponding bucketName: %+v\n", xerrors.Errorf(": %+w", err))
 		return false
 	}
 
 	if err := reader.Close(); err != nil {
-		logz.Errorf(ctx, "%+v\n", xerrors.Errorf(": %w", err))
+		logz.Errorf(ctx, "%+v\n", xerrors.Errorf(": %+w", err))
 		return false
 	}
 

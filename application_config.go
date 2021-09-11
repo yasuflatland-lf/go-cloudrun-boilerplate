@@ -77,22 +77,22 @@ func GetApplicationConfig(ctx context.Context) *applicationConfig {
 			// Cloud SQL Instance
 			appConfig.CloudSQLInstance, err = secret.GetSecret(appConfig.ImageName + "-CLOUDSQL_INSTANCES")
 			if err != nil {
-				logz.Criticalf(ctx, "%+v\n", xerrors.Errorf("CLOUDSQL_INSTANCES : %w\n", err))
+				logz.Criticalf(ctx, "%+v\n", xerrors.Errorf("CLOUDSQL_INSTANCES : %+w\n", err))
 			}
 
 			appConfig.Name, err = secret.GetSecret(appConfig.ImageName + "-DB_NAME")
 			if err != nil {
-				logz.Criticalf(ctx, "%+v\n", xerrors.Errorf("DB_NAME : %w\n", err))
+				logz.Criticalf(ctx, "%+v\n", xerrors.Errorf("DB_NAME : %+w\n", err))
 			}
 
 			appConfig.UserName, err = secret.GetSecret(appConfig.ImageName + "-DB_USERNAME")
 			if err != nil {
-				logz.Criticalf(ctx, "%+v\n", xerrors.Errorf("DB_USERNAME : %w\n", err))
+				logz.Criticalf(ctx, "%+v\n", xerrors.Errorf("DB_USERNAME : %+w\n", err))
 			}
 
 			appConfig.Password, err = secret.GetSecret(appConfig.ImageName + "-DB_PASSWORD")
 			if err != nil {
-				logz.Criticalf(ctx, "%+v\n", xerrors.Errorf("DB_PASSWORD : %w\n", err))
+				logz.Criticalf(ctx, "%+v\n", xerrors.Errorf("DB_PASSWORD : %+w\n", err))
 			}
 		}
 	})
